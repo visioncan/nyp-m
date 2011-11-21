@@ -11,11 +11,12 @@
 	};
 
 	$.fn.addTouchActive = function(){
-		addActiveEvent( this );
+		addActiveEvent( this.get(0) );
 	};
 
 	function addActiveEvent(el){
 		/* if able touch */
+		//$.log(el.nodeName);
 		if(window.Touch){
 			el.ontouchstart = function(e){
 				$(e.target).addClass('active');
@@ -38,7 +39,7 @@ var mobiScreen = {
 	minheight : null,
 	detect : function(){
 		this.minheight = window.innerHeight;
-		this.addHeightTo(['view', 'diaview']);
+		this.addHeightTo(['view']);
 	},
 	addStlye : function(el){
 		if(el){
@@ -64,38 +65,104 @@ var mobiScreen = {
 *
 ******************************************************************************/
 (function($){
-	var view, diaView,
-		options = {
+	var view,
+		diaView,
+		titleView,
+		contView,
+		currentOpts,
+		defaults = {
+			href      : "#",     //載入內容
+			title     : "",
+			barColor  : "#6D83A1",
 			aniType   : "slide", //效果
-			inViewFn  : null,    //enter view function
-			outViewFn : null     //exit view function
+			inViewFn  : function(){},    //enter view function
+			outViewFn : function(){}     //exit view function
 		};
-	$.intoDialogView = function(opt){
-		$.extend(options, opt);
+	$.fn.dialogView = function(opt){
+		$(this).unbind('click.dv').bind('click.dv', function(e) {
+			e.preventDefault();
+			currentOpts = null;
+			currentOpts = $.extend(defaults, {
+									href  : $(this).attr("href"), 
+									title : $(this).attr("title")}, opt);
+			//$.log(currentOpts);
+			$.dialogView(currentOpts);
+			return false;
+		});
+		return this;
+	};
+
+	$.dialogView = function(opt){
+		var options;
+		currentOpts = null;
+		currentOpts = options = $.extend(defaults, opt);
+		$.log(options);
 		view    = document.getElementById('view');
-		diaView = document.getElementById('diaview');
-		//$.log(options);
-		
+		diaView.getElementsByClassName("top-bar")[0].style.backgroundColor = options.barColor;
+
 		$(view).addClass("transitioning out " + options.aniType);
 		$(diaView).addClass("transitioning in " + options.aniType).show();
 
 		addListener(view,    transTo_DiaView);
 		addListener(diaView, transTo_DiaView);
 
-		if(options.inViewFn){
-			options.inViewFn();
+		$.dialogView.setTitle(options.title);
+
+		if(options.href !== "#" && options.href.indexOf("#") === 0){
+			var target = options.href.substr(options.href.indexOf("#"));
+
+			$('<div class="dialogview-tmp" />')
+				.hide()
+				.insertBefore( $(target) )
+				.bind('dialogview-close', function(){
+					//$.log(contView.children());
+					$(this).replaceWith($(contView).children());
+				});
+			
+			$(target).appendTo(contView);
 		}
 
-		$(diaView).find(".back-view").click(function(){
-			$(view).addClass("transitioning in reverse " + options.aniType).show();
-			$(diaView).addClass("transitioning out reverse " + options.aniType);
+		options.inViewFn();
+	};
+
+	function _draw() {
+		diaView = document.createElement("div");
+		diaView.id = "diaview";
+		diaView.style.minHeight = window.innerHeight + 'px';
+
+		contView = document.createElement("div");
+		contView.className = "cont";
+
+		var topdiv = document.createElement("div");
+		topdiv.className = "top-bar";
+
+		titleView = document.createElement("div");
+		titleView.className = "title";
+
+		var backBtn = document.createElement("a");
+		backBtn.className = "back-btn";
+		backBtn.href = "#";
+		backBtn.innerHTML = "回上一頁";
+
+		topdiv.appendChild(titleView);
+		topdiv.appendChild(backBtn);
+		diaView.appendChild(contView);
+		diaView.appendChild(topdiv);
+		document.body.appendChild(diaView);
+
+		$(backBtn).bind('click', function(){
+			//var options = currentOpts;
+			//$.log(currentOpts);
+			$(view).addClass("transitioning in reverse " + currentOpts.aniType).show();
+			$(diaView).addClass("transitioning out reverse " + currentOpts.aniType);
 
 			addListener(view,    transTo_View);
 			addListener(diaView, transTo_View);
 
 			return false;
-		});
-	};
+		}).addTouchActive();
+	}
+
 
 	function addListener(el, fn){
 		el.addEventListener('webkitAnimationEnd', fn, false);
@@ -108,10 +175,10 @@ var mobiScreen = {
 	function transTo_DiaView(e){
 		switch(e.target.id){
 			case "view":
-				$(e.target).removeClass("transitioning out " + options.aniType).hide();
+				$(e.target).removeClass("transitioning out " + currentOpts.aniType).hide();
 			break;
 			case "diaview":
-				$(e.target).removeClass("transitioning in " + options.aniType);
+				$(e.target).removeClass("transitioning in " + currentOpts.aniType);
 			break;
 		}
 		removeListener(e.target, transTo_DiaView);
@@ -119,17 +186,24 @@ var mobiScreen = {
 	function transTo_View(e){
 		switch(e.target.id){
 			case "view":
-				$(e.target).removeClass("transitioning in reverse " + options.aniType);
+				$(e.target).removeClass("transitioning in reverse " + currentOpts.aniType);
 			break;
 			case "diaview":
-				$(e.target).removeClass("transitioning out reverse " + options.aniType).hide();
-				if(options.outViewFn){
-					options.outViewFn();
-				}
+				$(e.target).removeClass("transitioning out reverse " + currentOpts.aniType).hide();
+				$.event.trigger('dialogview-close');
+				currentOpts.outViewFn();
 			break;
 		}
 		removeListener(e.target, transTo_View);
 	}
+
+	$(document).ready(_draw);
+
+	$.extend($.dialogView, {
+		setTitle : function (str) {
+			titleView.innerHTML = str;
+		}
+	});
 })(jQuery);
 
 
@@ -146,28 +220,22 @@ var mobiScreen = {
 		i,
 		page,
 		slides,
-		navPages,
 		dialogView,
 		Wrapper;
 	$.galleryView = function(){};
 
 	function initWithPhotos(photos){
-		dialogView = document.getElementById("diaview");
-		$(dialogView).addClass('gallery');
+		dialogView = document.getElementById("diaview").getElementsByClassName("cont")[0];
 
 		Wrapper = document.createElement("DIV");
 		Wrapper.id = "gallery-wrapper";
 
-		navPages = document.createElement("DIV");
-		navPages.id = "gallery-nav-pages";
-
 		dialogView.appendChild(Wrapper);
-		dialogView.appendChild(navPages);
 		dialogView.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
 		
 		slides = photos;
 		gallery = new SwipeView(Wrapper, { numberOfPages: slides.length });
-		navPages.innerHTML = "1/" + slides.length;
+		$.dialogView.setTitle("1/" + slides.length);
 
 		for (i=0; i<3; i++) {
 			page = i==0 ? slides.length-1 : i-1;
@@ -200,15 +268,14 @@ var mobiScreen = {
 				}
 			}
 			//title 
-			navPages.innerHTML = gallery.pageIndex  + 1 + "/" + slides.length;
+			$.dialogView.setTitle(gallery.pageIndex  + 1 + "/" + slides.length);
 		});
 	}
 
 	function close () {
 		dialogView.removeEventListener('touchmove', function (e){ e.preventDefault(); }, false);
 		dialogView.removeChild(Wrapper);
-		dialogView.removeChild(navPages);
-		Wrapper = navPages = dialogView = slides = gallery = null;
+		Wrapper = dialogView = slides = gallery = null;
 	}
 	$.extend($.galleryView, {
 		initWithPhotos : function(photos){
@@ -568,15 +635,10 @@ aTown[22][0]="南竿鄉209", aTown[22][1]="北竿鄉210", aTown[22][2]="莒光�
 
 	$.mbox.close = function () {
 		var options = getCurrentOpts();
-		if( options.overlayShow){
-			overlay.trans({
-				css      : {'opacity' : 0},
-				delay    : 200,
-				onFinish : function(){
-					$(this).hide();
-				}
-			});
-		}
+
+		overlayFadeOut(options);
+
+		
 		wrap.trans({
 			translate:{x:0, y:0},
 			css      : { 'opacity' : 0},
@@ -596,15 +658,7 @@ aTown[22][0]="南竿鄉209", aTown[22][1]="北竿鄉210", aTown[22][2]="莒光�
 	function _show () {
 		var options = getCurrentOpts();
 		
-		if( options.overlayShow){
-			overlay.css({
-				'backgroundColor' : options.overlayColor,
-				'display' : 'block',
-				'height'  : $(document).height()
-			}).trans({
-				css : {'opacity' : options.overlayOpacity}
-			});
-		}
+		overlayFadeIn(options);
 
 		var wrapCSS, wrapTop;
 		switch( options.type ){
@@ -669,6 +723,29 @@ aTown[22][0]="南竿鄉209", aTown[22][1]="北竿鄉210", aTown[22][2]="莒光�
 		}).appendTo(wrap);
 	}
 
+	function overlayFadeIn (options) {
+		if( options.overlayShow){
+			overlay.css({
+				'backgroundColor' : options.overlayColor,
+				'display' : 'block',
+				'height'  : $(document).height()
+			}).trans({
+				css : {'opacity' : options.overlayOpacity}
+			});
+		}
+	}
+	function overlayFadeOut (options) {
+		if( options.overlayShow){
+			overlay.trans({
+				css      : {'opacity' : 0},
+				delay    : 200,
+				onFinish : function(){
+					$(this).hide();
+				}
+			});
+		}
+	}
+
 	function getCurrentOpts () {
 		if(currentOpts){
 			return currentOpts;
@@ -697,6 +774,16 @@ aTown[22][0]="南竿鄉209", aTown[22][1]="北竿鄉210", aTown[22][2]="莒光�
 	};
 
 	$(document).ready(init);
+
+	$.extend($.mbox, {
+		overlayFadeIn : function(){
+			var options = getCurrentOpts();
+			overlayFadeIn(options);
+		},
+		overlayFadeOut : function(){
+			overlayFadeOut(options);
+		}
+	});
 })(jQuery);
 
 
