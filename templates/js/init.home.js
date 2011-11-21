@@ -16,25 +16,22 @@ function init(){
 *
 ******************************************************************************/
 (function($){
+	var timeId;
 	$.searchPanel = function(){
 		$("#kw-input").focus(function(){
 			$("#search-bar").addClass("focus");
 			$("#overlay").addClass("on search");
+			if(!window.Touch){ 
+				clearTimeout(timeId);
+			}
 		}).blur(function(){
 			if(window.Touch){
 				removeFocus();
 			}else{
-				setTimeout(removeFocus, 500);
+				timeId = setTimeout(removeFocus, 500);
 			}
 		});
-		
-		//全部搜尋click
-		$("#se-all-btn").click(function(){
-			var k=$.trim($("#kw-input").val());
-			document.location.href="?func=search_all_listing&k="+k;
-		});
-		
-		//鄰近搜尋click
+
 		$("#se-near-btn").click(function(){
 			var gdata = $.geo.data();
 			//$.log(gdata.geo);
@@ -57,7 +54,12 @@ function init(){
 
 /******************************************************************************
 *
-*  list menu
+.__  .__          __   
+|  | |__| _______/  |_ 
+|  | |  |/  ___/\   __\
+|  |_|  |\___ \  |  |  
+|____/__/____  > |__|  
+             \/  
 *
 ******************************************************************************/
 (function($){
@@ -67,9 +69,7 @@ function init(){
 	$.menu = function(){
 		mainList = document.getElementById("list");
 		container = document.getElementById("container");
-		//mainList.addEventListener('webkitTransitionEnd', searchBarVisibleOrNot, false);
-		//mainList.addEventListener('transitionend',       searchBarVisibleOrNot, false);
-		//mainList.addEventListener('oTransitionEnd',      searchBarVisibleOrNot, false);
+
 		$("#near-cata > li > a, #all-cata > li > a").click(function(){
 			if( $(this).parent("li").hasClass("current") ){;
 				if($(mainList).hasClass("sub2")){
@@ -78,11 +78,16 @@ function init(){
 					container.className = "";
 					fixHeightByName("auto");
 					$(mainList).find(".current").removeClass("current");
-				}else{
+				}else if($(mainList).hasClass("sub3")){
 					//exit sub3
 					$(this).siblings(".sub2").children('.current').removeClass('current');
 					mainList.className = "sub2";
 					fixHeightByName(".sub2", $(this));
+				}else if($(mainList).hasClass("sub4")){
+					//exit sub4
+					$(mainList).find('.sub3 .current').removeClass('current');
+					mainList.className = "sub3";
+					fixHeightByName(".sub3", $(this).siblings(".sub2").find(".current a"));
 				}
 			}else{
 				//進入第2階
@@ -97,45 +102,54 @@ function init(){
 				mainList.className = "sub2";
 				container.className = "insub";
 				fixHeightByName(".sub2", $(this));
+
 			}
 			return false;
 		});
 		//所有分類-進入第3階
-		$("#all-cata .sub2 a").click(function(){
+		//子階
+		$("#all-cata .sub2").delegate("a", "click", function(){
 			var thisEl = $(this);
-			/****
-			* if sub3 is not exist than insert ul 
-			****/
-			if( thisEl.siblings(".sub3").length === 0 ){
+			var currentSub = parseInt(thisEl.parent().parent("ul").get(0).className.substring(3));
+			var targetGata = targetGata = currentSub + 1;
+
+			if( thisEl.attr("href") !== "#" ){
+				window.location = thisEl.attr("href");
+				return false;
+			}
+			if( thisEl.siblings(".sub" + targetGata).length === 0 ){
+				
 				var param_data = {
-						fn  : "get_menu",
-						mid : $(this).get(0).className
-					};
+					fn   : "get_menu",
+					sub  : targetGata,
+					goid : $(this).attr("goid"),
+					cls  : $(this).get(0).className
+				};
 				$.ajax({
 					data 	 : param_data,
 					dataType : "html" ,
-					//global: false,
 					success  : function(html){
 						thisEl.after(html);
 						thisEl.parent("li").addClass("current");
-						mainList.className = "sub3";
-						fixHeightByName(".sub3", thisEl);
+						mainList.className = "sub" + targetGata;
+						fixHeightByName(".sub"+targetGata, thisEl);
 					}
 				});
+				//$.log(param_data);
 			}else{
 				thisEl.parent("li").addClass("current");
-				mainList.className = "sub3";
-				fixHeightByName(".sub3", thisEl);
+				mainList.className = "sub" + targetGata;
+				fixHeightByName(".sub" + targetGata, thisEl);
 			}
 			return false;
 		});
 	};
-	
+
 	function isGeo() {
 		var geoInfo = $.geo.data();
 		return geoInfo.geo;
 	}
-	
+
 	function fixHeightByName(nameType, target) {
 		if(nameType === "auto"){
 			mainList.style.height = "auto";

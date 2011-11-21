@@ -110,11 +110,12 @@
 				isGeo = true;
 				//清除自定資料
 				$.cookie('cus_addr', null);
+				$.cookie('res_addr', null);
 				addr = "";
 				setAddr();
 				addCheckIconByEl();
 			}
-			navigator.geolocation.getCurrentPosition(geoSuccess, e ? geoError : function(){});
+			navigator.geolocation.getCurrentPosition(geoSuccess, e ? geoError : function(){stopSpin();});
 		} else {
 			if(e){ geoError('你的瀏覽器不支援定位') };
 		}
@@ -140,6 +141,7 @@
 	function geoError (msg) {
 		//msg.code == 1
 		//msg.message == "User denied Geolocation"
+		stopSpin();
 		isGeo = false;
 		alert(typeof msg == 'string' ? msg : "定位失敗" + msg );
 	}
@@ -192,36 +194,42 @@
 		});
 
 		$("#cusloc-form .comm-form").submit(function(){
-			if( !isSubmitGeo ){
-				isSubmitGeo = true;
-				isGeo = false;
-				if( $("#city_select").val() == 0){
-					alert("請選擇縣市和區域");
-				}else{
-					var cityIdx = $("#city_select").val();
-					var townIdx = $("#town_select").val();
-					var param_data = {
-						fn   : "set_geo",
-						city : cityIdx,
-						town : townIdx,
-						street  : $("#street_input").val(),
-						fulladdr: $.selectCity.getFullAddr(cityIdx, townIdx) + $("#street_input").val()
-					};
-					
-					$.ajax({
-						data 	 : param_data,
-						success  : function(json){
-							if(json.stat == "success"){
-								isSubmitGeo = false;
-								cusAddr[0] = json.city;
-								cusAddr[1] = json.town;
-								cusAddr[2] = json.street;
-								$.cookie('cus_addr', cusAddr, { expires: cookie_expires });
-								exitGeoBox();
-							}
-						}
-					});
-				}
+			isGeo = false;
+			if( $("#city_select").val() == 0){
+				//$("#city_select").val(0);
+				alert("請選擇縣市和區域");
+			}else{
+				var cityIdx = $("#city_select").val();
+				var townIdx = $("#town_select").val();
+				var param_data = {
+					fn   : "set_geo",
+					city : cityIdx,
+					town : townIdx,
+					street  : $("#street_input").val(),
+					fulladdr: $.selectCity.getFullAddr(cityIdx, townIdx) + $("#street_input").val()
+				};
+				
+				alert("送出");
+
+				cusAddr[0] = $("#city_select").val();
+				cusAddr[1] = $("#town_select").val();
+				cusAddr[2] = $("#street_input").val();
+				$.cookie('cus_addr', cusAddr, { expires: cookie_expires });
+				$.cookie('res_addr', '台北市中太原路1112號', { expires: cookie_expires });
+				exitGeoBox();
+				// $.ajax({
+				// 	data 	 : param_data,
+				// 	success  : function(json){
+				// 		if(json.stat == "success"){
+				// 			isSubmitGeo = false;
+				// 			cusAddr[0] = json.city;
+				// 			cusAddr[1] = json.town;
+				// 			cusAddr[2] = json.street;
+				// 			$.cookie('cus_addr', cusAddr, { expires: cookie_expires });
+				// 			exitGeoBox();
+				// 		}
+				// 	}
+				// });
 			}
 			return false;
 		});
@@ -247,13 +255,13 @@
 		if(isGeo){
 			geoEl.children('.addr').text(addr);
 			cusEl.children('.addr').text('');
+			$('#cusloc-form .res-addr').text('');
+			$('#cusloc-form .res-addr').parent("li").hide();
 		}else{
-			if( typeof(cusAddr) === "object" && 
-				cusAddr[0] !== 0 && 
-				cusAddr[1] !== 0 || 
-				cusAddr[2] !== ''  ){
-				addr = $.selectCity.getFullAddr(cusAddr[0], cusAddr[1]) + cusAddr[2];
-				cusEl.children('.addr').text(addr);
+			if($.cookie('res_addr') !== null){
+				cusEl.children('.addr').text($.cookie('res_addr'));
+				$('#cusloc-form .res-addr').parent("li").show();
+				$('#cusloc-form .res-addr').text($.cookie('res_addr'));
 			}
 			geoEl.children('.addr').text('');
 		}
