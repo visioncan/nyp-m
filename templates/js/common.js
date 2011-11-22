@@ -529,16 +529,16 @@ aTown[22][0]="南竿鄉209", aTown[22][1]="北竿鄉210", aTown[22][2]="莒光�
 		townSel,
 		streetInput,
 		options = {
-		cityId : null,
-		townId : null,
-		streetId: null,
-		cityDefTxt : '請選擇縣市',
-		townDefTxt : '請選擇區域',
-		initData : {
-			city : 0,
-			town : 0,
-			street : ""
-		}
+			cityId : null,
+			townId : null,
+			streetId: null,
+			cityDefTxt : '請選擇縣市',
+			townDefTxt : '請選擇區域',
+			initData : {
+				city : 0,
+				town : 0,
+				street : ""
+			}
 	};
 
 	$.selectCity = function(opt){
@@ -587,6 +587,11 @@ aTown[22][0]="南竿鄉209", aTown[22][1]="北竿鄉210", aTown[22][2]="莒光�
 	}
 
 	$.extend($.selectCity, {
+		aCity  : aCity,
+		aTown  : aTown,
+		append_option : function(target, ary) {
+			append_option(target, ary);
+		},
 		getFullAddr : function(cidx, tidx){
 			return aCity[cidx] + aTown[cidx][tidx];
 		}

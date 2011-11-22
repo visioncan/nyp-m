@@ -5,6 +5,7 @@ function init(){
 	$.navBar();
 	$(window).load($.geo()); //載入完後才作定位
 	$.loadmore();
+	$.citySel(); //縣市選單
 }
 
 
@@ -219,8 +220,32 @@ function init(){
 
 function hdldata(){
 	$.loadmore.done();
-	$.log("call back !!");
+	//$.log("call back !!");
 }
+
+
+
+
+
+/******************************************************************************
+*
+* 縣市選單
+*
+*******************************************************************************/
+(function($){
+	$.citySel = function(){
+		//$.log($.selectCity.aCity);
+		var listCitySel = document.getElementById("listing-city-select");
+		$.selectCity.append_option(listCitySel, $.selectCity.aCity);
+		$(listCitySel).change(function(){
+			if( $(this).val() !== 0){
+				$.log($(this).val());
+			}
+		});
+	};
+})(jQuery);
+
+
 
 
 
