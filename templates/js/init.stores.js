@@ -42,10 +42,23 @@ function init(){
 			return false;
 		});
 
-		$("#share-box").toggle(function(){
-			$.loader.start();
-		},function(){
-			$.loader.stop();
+		$("#share-btn").click(function(){
+			$.mbox({
+				type   : 'NAV_BOX',
+				arwPos : 'right',
+				href   : '#share-box'
+			});
+		});
+
+		//addfav
+		$("#share-box .add-fav").click(function(){
+			//加入最愛店家
+			var param_data = {
+				func : "addfavo",
+				sid  : $("#corp-info").attr("sid")
+			};
+			alert("加入成功/失敗");
+			return false;
 		});
 	};
 
