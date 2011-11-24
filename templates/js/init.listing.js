@@ -86,6 +86,8 @@ function init(){
 			last_id : listEl.children("li:last-child").attr("id"),
 			init    : isinit ? 1 : 0
 		};
+		param_data = $.extend(param_data, isFavPage());
+		//$.log( param_data );
 		$.ajax({
 			data 	 : param_data,
 			cache    : false,
@@ -190,6 +192,19 @@ function init(){
 		listEl.append(lia);
 	}
 
+	function isFavPage () {
+		if($(document.body).hasClass("fav")){
+			var o_cata = $("#order-cata-select").val();
+			var o_city = $("#order-city-select").val();
+			return {
+				isfav      : true,
+				order_cata : o_cata,
+				order_city : o_city
+			};
+		}else{
+			return {};
+		}
+	}
 
 	$.fn.drawText = function(str, type){
 		//$.log(this.get(0));
@@ -236,6 +251,8 @@ function hdldata(){
 	$.citySel = function(){
 		//$.log($.selectCity.aCity);
 		var listCitySel = document.getElementById("listing-city-select");
+		if(listCitySel === null)
+		return;
 		$.selectCity.append_option(listCitySel, $.selectCity.aCity);
 		$(listCitySel).change(function(){
 			if( $(this).val() !== 0){
@@ -246,6 +263,13 @@ function hdldata(){
 })(jQuery);
 
 
+
+
+/******************************************************************************
+*
+* 我的最愛店家
+*
+*******************************************************************************/
 
 
 
