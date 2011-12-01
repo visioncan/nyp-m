@@ -19,9 +19,15 @@
 
 	function openGeoPanel () {
 		$.mbox({
-			type   : 'NAV_BOX',
-			arwPos : 'left',
-			href   : '#geo'
+			type    : 'NAV_BOX',
+			arwPos  : 'left',
+			href    : '#geo',
+			onStart : function(){
+				$.geo.open();
+			},
+			onClose : function(){
+				$.geo.close();
+			}
 		});
 	}
 
@@ -59,8 +65,9 @@
 		cusAddr = [0,0,''],   //自定位置資料
 		cookie_expires = 0.2, //自定位置資料過期日
 		isSubmitGeo = false,  //是否送出地址
-		geo_spinner,          //載入
-		btn_spinner,
+		geo_spinner,          //載入spin
+		btn_spinner,          //載入spin
+		tmp_addr,
 		spin_opt = {
 			lines: 8,  
 			length: 3,  
@@ -91,6 +98,7 @@
 			getGeoLoc();
 		}else{
 			cusAddr = $.cookie('cus_addr').split(",");
+			addr    = $.cookie('res_addr');
 			//寫出地址
 			setAddr();
 		}
@@ -214,22 +222,10 @@
 				cusAddr[0] = $("#city_select").val();
 				cusAddr[1] = $("#town_select").val();
 				cusAddr[2] = $("#street_input").val();
+				addr = '台北市中太原路1112號';
 				$.cookie('cus_addr', cusAddr, { expires: cookie_expires });
-				$.cookie('res_addr', '台北市中太原路1112號', { expires: cookie_expires });
+				$.cookie('res_addr', addr, { expires: cookie_expires });
 				exitGeoBox();
-				// $.ajax({
-				// 	data 	 : param_data,
-				// 	success  : function(json){
-				// 		if(json.stat == "success"){
-				// 			isSubmitGeo = false;
-				// 			cusAddr[0] = json.city;
-				// 			cusAddr[1] = json.town;
-				// 			cusAddr[2] = json.street;
-				// 			$.cookie('cus_addr', cusAddr, { expires: cookie_expires });
-				// 			exitGeoBox();
-				// 		}
-				// 	}
-				// });
 			}
 			return false;
 		});
@@ -265,6 +261,7 @@
 			}
 			geoEl.children('.addr').text('');
 		}
+
 	}
 
 	function addCheckIconByEl () {
@@ -279,6 +276,17 @@
 		}
 	}
 
+	function onOpen () {
+		tmp_addr = addr;
+	}
+
+	function onClose () {
+		if(tmp_addr != addr){
+			setTimeout(function(){ window.location.reload(); }, 500);
+		}
+	}
+
+
 	$.extend($.geo, {
 		data : function(){
 			return {
@@ -287,6 +295,12 @@
 				'addr' : addr,
 				'geo'  : isGeo ? '1' : '0' 
 			}
+		},
+		open  : function() {
+			onOpen();
+		},
+		close : function(){
+			onClose();
 		}
 	});
 })(jQuery);

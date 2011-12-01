@@ -630,7 +630,9 @@ var mobiScreen = {
 		overlayColor   : '#000',
 
 		href           : null,
-		padding        : 12
+		padding        : 12,
+		onStart        : function(){},
+		onClose        : function(){}
 	};
 
 	
@@ -651,6 +653,7 @@ var mobiScreen = {
 				isOpen = false;
 			}
 		});
+		options.onClose();
 	};
 
 	function init () {
@@ -666,7 +669,7 @@ var mobiScreen = {
 		switch( options.type ){
 			case 'NAV_BOX' :
 				wrapCSS = {	
-					position : 'fixed'
+					//position : 'fixed'
 				};
 				wrapTop = 53;
 			break;
@@ -696,6 +699,7 @@ var mobiScreen = {
 			
 			$(target).appendTo(cont);
 		}
+		options.onStart();
 	}
 
 	function _draw () {
@@ -751,6 +755,8 @@ var mobiScreen = {
 	function getCurrentOpts () {
 		if(currentOpts){
 			return currentOpts;
+		}else{
+			return $.extend({}, $.fn.mbox.defaults);
 		}
 	}
 
@@ -783,6 +789,7 @@ var mobiScreen = {
 			overlayFadeIn(options);
 		},
 		overlayFadeOut : function(){
+			var options = getCurrentOpts();
 			overlayFadeOut(options);
 		}
 	});

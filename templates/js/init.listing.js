@@ -6,6 +6,7 @@ function init(){
 	$(window).load($.geo()); //載入完後才作定位
 	$.loadmore();
 	$.citySel(); //縣市選單
+	$.searchPanel();
 }
 
 
@@ -125,6 +126,7 @@ function init(){
 		loadspin.className = 'spin';
 		document.getElementById('loadmore').innerHTML = '正在載入更多..';
 		document.getElementById('loadmore').appendChild(loadspin);
+		document.getElementById('loadmore').className = "loading";
 		load_spinner = new Spinner(spin_opt).spin(loadspin);
 	}
 
@@ -132,6 +134,7 @@ function init(){
 		isLoading = false;
 		load_spinner.stop();
 		document.getElementById('loadmore').innerHTML = '';
+		document.getElementById('loadmore').className = "";
 		loadspin = null;
 	}
 
@@ -154,7 +157,8 @@ function init(){
 		    		'vip'    : 1,
 		    		'name'   : '義大世界',
 		    		'sid'    : sid,
-		    		'imgsrc' : 'http://lorempixel.com/100/100/',
+		    		//'imgsrc' : 'http://lorempixel.com/100/100/',
+		    		'imgsrc' : 'none',  //沒有圖片
 		    		'dist'   : '500',
 		    		'tel'    : _canvas[tmpsid].tel,
 		    		'addr'   : _canvas[tmpsid].addr
@@ -162,6 +166,9 @@ function init(){
 		    }
 		}
 		hasMore = hasmore;
+		if(!hasMore){
+			document.getElementById('loadmore').style.display = "none";
+		}
 		//clear
 		_encode = null;
 		hasmore = null;
@@ -181,11 +188,15 @@ function init(){
 		lia.attr("id", + data.sid);
 		lia.find("a").attr("href", "/stores.php?" + data.sid);
 		lia.find("h3").text(data.name);
-		lia.find("img").attr("src", data.imgsrc);
 		lia.find(".tel").attr("id", "tel_" + data.sid).drawText(data.tel, "tel");
 		lia.find(".addr").attr("id", "addr_" + data.sid).drawText(data.addr);
 		lia.find(".dist").text(data.dist + "公尺");
-
+		if(data.imgsrc != 'none'){
+			lia.find("img").attr("src", data.imgsrc);
+		}else{
+			lia.addClass('noimg');
+		}
+		
 		if(data.vip){
 			lia.append(vipLabel);
 		}
@@ -265,11 +276,38 @@ function hdldata(){
 
 
 
+
 /******************************************************************************
 *
-* 我的最愛店家
+*  search panel
 *
-*******************************************************************************/
+******************************************************************************/
+(function($){
+	var timeId;
+	$.searchPanel = function(){
+		$("#kw-input").focus(function(){
+			$("#search-bar").addClass("focus");
+			if(!window.Touch){ 
+				clearTimeout(timeId);
+			}
+		}).blur(function(){
+			timeId = setTimeout(removeFocus, 1000);
+		});
+
+		$("#se-near-btn").click(function(){
+			var gdata = $.geo.data();
+			//$.log(gdata.geo);
+			if(gdata.geo == 0){
+				alert('您必需先定位您目前的位置才能搜尋喔!');
+				return false;
+			}
+		});
+
+	};
+	function removeFocus () {
+		$("#search-bar").removeClass("focus");
+	}
+})(jQuery);
 
 
 

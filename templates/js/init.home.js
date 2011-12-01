@@ -25,11 +25,7 @@ function init(){
 				clearTimeout(timeId);
 			}
 		}).blur(function(){
-			if(window.Touch){
-				removeFocus();
-			}else{
-				timeId = setTimeout(removeFocus, 500);
-			}
+			timeId = setTimeout(removeFocus, 1000);
 		});
 
 		$("#se-near-btn").click(function(){
