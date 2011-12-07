@@ -6,6 +6,18 @@ function init(){
 	$.menu();            //catalog menu
 	$.navBar();
 	$(window).load(function(){$.geo()}); //載入完後才作定位
+	$("#ad .sogo").click(function(){
+		var link;
+		if(browser.versions.ios){
+			link = "http://itunes.apple.com/app/id351330048?mt=8";
+		}else if(browser.versions.android){
+			link = "market://details?id=com.chyp.hipagesogo";
+		}else{
+			link = "https://sites.google.com/a/myp.com.tw/hipagesogo/";
+		}
+		window.open(link);
+		return false;
+	});
 }
 
 

@@ -554,13 +554,12 @@ var mobiScreen = {
 		}
 	};
 	function addEvent () {
-		$(citySel).change(function(){
+		$(citySel).bind("change", function(){
 			var selIndex = citySel.value;
 			$(townSel).empty();
 			$.log(selIndex);
 			append_option(townSel, aTown[selIndex]);
 			townSel.focus();
-
 		});
 	}
 	function creat_def_val(){
@@ -647,7 +646,7 @@ var mobiScreen = {
 			translate:{x:0, y:0},
 			css      : { 'opacity' : 0},
 			onFinish : function(){
-				$(this).hide();
+				wrap.hide();
 				$.event.trigger('mbox-close');
 				currentOpts = null;
 				isOpen = false;
@@ -764,9 +763,17 @@ var mobiScreen = {
 		var reopts = $.extend({}, {
 				duration : 0.2, 
 				delay : 0, 
-				onFinish : null }, opts);
-
-		if($.fn.transition.supported){
+				onFinish : function(){} }, opts);
+		
+		if(browser.versions.android){
+			if( reopts.translate ){
+				reopts.css = $.extend({
+					top : reopts.translate.y
+				}, reopts.css);
+			}
+			$(this).css(reopts.css);
+			reopts.onFinish();
+		}else if($.fn.transition.supported){
 			if(reopts.translate || reopts.scale || reopts.rotate){
 				$(this).transformTransition(reopts);
 			}else{
@@ -881,6 +888,28 @@ $.extend($.canvas, {
 });
 
 
+
+ /******************************************************************************
+*
+*  browser
+*
+*******************************************************************************/
+var browser = {versions:function(){
+			var u = navigator.userAgent, app = navigator.appVersion;
+			return { 
+				trident: u.indexOf('Trident') > -1, //IE核
+				presto: u.indexOf('Presto') > -1, //opera核
+				webKit: u.indexOf('AppleWebKit') > -1, //蘋果、谷歌核
+				gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1,//火狐核
+				mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否為移動
+				ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios
+				android: u.indexOf('Android') > -1, //android
+				iPhone: u.indexOf('iPhone') > -1, //是否為iPhone
+				iPad: u.indexOf('iPad') > -1, //是否iPad
+				webApp: u.indexOf('Safari') == -1, //是否web應該程序，沒有頭部與底部,
+				app: app
+				};
+}()}
 
 
 

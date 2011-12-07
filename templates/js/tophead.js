@@ -24,9 +24,11 @@
 			href    : '#geo',
 			onStart : function(){
 				$.geo.open();
+				fixAndroid.onStart();
 			},
 			onClose : function(){
 				$.geo.close();
+				fixAndroid.onClose();
 			}
 		});
 	}
@@ -35,9 +37,30 @@
 		$.mbox({
 			type   : 'NAV_BOX',
 			arwPos : 'right',
-			href   : '#member'
+			href   : '#member',
+			onStart : function(){
+				fixAndroid.onStart();
+			},
+			onClose : function(){
+				fixAndroid.onClose();
+			}
 		});
 	}
+
+	var fixAndroid = {
+		onStart : function(){
+			if(browser.versions.android){
+				$("#search-bar").hide();
+				$("#ad").hide();
+			}
+		},
+		onClose : function(){
+			if(browser.versions.android){
+				$("#search-bar").show();
+				$("#ad").show();
+			}
+		}
+	};
 
 	$.extend($.navBar, {
 		openGeo : function() {
