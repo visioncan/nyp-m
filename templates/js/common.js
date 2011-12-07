@@ -909,7 +909,7 @@ var browser = {versions:function(){
 				webApp: u.indexOf('Safari') == -1, //是否web應該程序，沒有頭部與底部,
 				app: app
 				};
-}()}
+}()};
 
 
 
