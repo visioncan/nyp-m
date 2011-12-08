@@ -78,6 +78,9 @@ function init(){
 		mainList = document.getElementById("list");
 		container = document.getElementById("container");
 
+		if($("#near-cata").length == 0)
+		return;
+		
 		$("#near-cata > li > a, #all-cata > li > a").click(function(){
 			if( $(this).parent("li").hasClass("current") ){;
 				if($(mainList).hasClass("sub2")){
