@@ -40,6 +40,9 @@ var mobiScreen = {
 	detect : function(){
 		this.minheight = window.innerHeight;
 		this.addHeightTo(['view']);
+		if( browser.versions.android ){
+			$(document.body).addClass('android');
+		}
 	},
 	addStlye : function(el){
 		if(el){

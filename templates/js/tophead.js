@@ -50,14 +50,14 @@
 	var fixAndroid = {
 		onStart : function(){
 			if(browser.versions.android){
-				$("#search-bar").hide();
-				$("#ad").hide();
+				$("#container").hide();
+				//$("#ad").hide();
 			}
 		},
 		onClose : function(){
 			if(browser.versions.android){
-				$("#search-bar").show();
-				$("#ad").show();
+				$("#container").show();
+				//$("#ad").show();
 			}
 		}
 	};
