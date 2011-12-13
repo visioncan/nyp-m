@@ -245,8 +245,6 @@ var mobiScreen = {
 			page = i==0 ? slides.length-1 : i-1;
 			el = document.createElement('img');
 			el.src = slides[page].img;
-			el.width = slides[page].width;
-			el.height = slides[page].height;
 			gallery.masterPages[i].appendChild(el);
 
 			el = document.createElement('span');
@@ -264,8 +262,6 @@ var mobiScreen = {
 				if (upcoming != gallery.masterPages[i].dataset.pageIndex) {
 					el = gallery.masterPages[i].querySelector('img');
 					el.src = slides[upcoming].img;
-					el.width = slides[upcoming].width;
-					el.height = slides[upcoming].height;
 					
 					el = gallery.masterPages[i].querySelector('span');
 					el.innerHTML = slides[upcoming].desc;
