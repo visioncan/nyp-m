@@ -9,7 +9,6 @@ var ypedmfn = {
 			console.log('DM嵌入錯誤');
 			return;
 		}
-		
 		this.creat();
 	},
 	creat : function() {
@@ -32,18 +31,14 @@ var ypedmfn = {
 			this.frame.style.width = frameWidth + "px";
 		}
 
+
+		frameParam.push("host=" + window.location.host);
 		frameParam.push("width=" + frameWidth);
 		if(ypedm.page != undefined){
 			frameParam.push("page=" + ypedm.page);
 		}
 		this.frame.src = edmDefaults.host + ypedm.id + "/?" + frameParam.join("&");
 
-
-		if (this.frame.attachEvent){ //for ie
-			this.frame.attachEvent("onload", this.oniFrameLoad );
-		}else{
-			this.frame.onload = this.oniFrameLoad;
-		}
 
 		this.outer.style.width = frameWidth + "px";
 		//outer.style.overflow = "hidden";
@@ -65,7 +60,9 @@ var ypedmfn = {
 
 
 
-
+function resizeIframe (height) {
+	document.getElementById('edm-frame').style.height = parseInt(height) + 'px';
+}
 
 
 var log = function(str, method) {

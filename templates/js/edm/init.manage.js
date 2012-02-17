@@ -1,7 +1,10 @@
 function init () {
 	if($(document.body).hasClass('uploadbyDOC')){
+		$.uploadTabs();
 		$.upload({ by : "doc" });
 		linkaddhost();
+	}else if($(document.body).hasClass('uploadbyIMG')){
+		$.uploadTabs();
 	}else if ($(document.body).hasClass('manage')){
 		$.edmList();
 		linkaddhost();
@@ -77,6 +80,24 @@ function linkaddhost() {
 
 
 
+/**********************************************
+  upload tabs
+**********************************************/
+(function($){
+	$.uploadTabs = function(){
+		$("#tabs li").eq(0).click(function() {
+			if (!$(this).hasClass("current")) {
+				window.location = "dm_upload.php?type=img";
+			}
+		});
+		$("#tabs li").eq(1).click(function() {
+			if (!$(this).hasClass("current")) {
+				window.location = "dm_upload.php";
+			}
+		});
+	};
+})(jQuery);
+
 
 /**********************************************
   upload 
@@ -111,7 +132,7 @@ function linkaddhost() {
 			'width'     : 180,
 		    'height'    : 45,
 		    'fileExt'   : '*.pdf;*.doc;*.ppt',
-		    'fileDesc'  : 'Document Files (.PDF, .DOC, .PPT)',
+		    'fileDesc'  : '文件 (.PDF, .DOC, .PPT)',
 		    'multi'     : false,
 		    'sizeLimit' : 102400000, // 100mb
 		    'onSelect'  : function(event, ID, fileObj) {

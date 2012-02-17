@@ -12,7 +12,25 @@ function init () {
 	}
 }
 
+function load() {
+	helperResize();
+}
 
+function helperResize() {
+	if(typeof parentHost == "undefined"){
+		return;
+	}
+	var height = $(document.body).outerHeight();
+	document.getElementById('framehelper').src = "//" + parentHost + "/framehelper.html?height=" + height + "&" + Math.random();
+}
+function linkaddhost() {
+	//link 加 host
+	if(typeof parentHost != "undefined"){
+		$(".upload_link").each(function(){
+			$(this).attr("href", $(this).attr("href") + "?host=" + parentHost);
+		});
+	}
+}
 
 
 (function($){
@@ -34,7 +52,6 @@ function init () {
 		};
 	$.swfView = function(opt){
 		options = $.extend({}, defaults, opt);
-		//viewer = $("#" + options.id);
 		addjs();
 	};
 	function addjs () {
@@ -78,7 +95,7 @@ function init () {
 
 
 $(document).ready(init);
-
+window.onload = load;
 
 Object.size = function(obj) {
     var size = 0, key;
