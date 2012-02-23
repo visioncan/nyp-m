@@ -94,12 +94,12 @@ function linkaddhost() {
 	$.uploadTabs = function(){
 		$("#tabs li").eq(0).click(function() {
 			if (!$(this).hasClass("current")) {
-				window.location = "dm_upload.php?type=img";
+				window.location = "dm_upload.php?type=img&host=" + parentHost;
 			}
 		});
 		$("#tabs li").eq(1).click(function() {
 			if (!$(this).hasClass("current")) {
-				window.location = "dm_upload.php";
+				window.location = "dm_upload.php?host=" + parentHost;
 			}
 		});
 	};
@@ -200,7 +200,7 @@ function linkaddhost() {
 		   },
 		   'onAllComplete' : function(event, data) {
 		   	Form.find(".submit-btn").removeAttr("disabled").removeClass("disabled").val("儲存並排序");
-		   	Form.children("form").attr("action", "/dm_sort.php");
+		   	Form.children("form").attr("action", "/dm_sort.php?host=" + parentHost);
 		   	var successBox = $("<div/>",{ 'class' : 'success', 'html' : '上傳成功', 'css' : {'top':'10px'} });
 		    	var outer      = $("<div/>",{ 'class' : 'uploadifyQueueItem'});
 		    	var size       = Math.round(data.allBytesLoaded / 1024 );
@@ -218,6 +218,7 @@ function linkaddhost() {
 		    	setTimeout(function(){
 		    		$("#upload-process").addClass("done").css({'height':38, 'backgroundColor':'#EAFDDB'}).append(outer).append(successBox);
 		    	}, 260);
+		    	setTimeout(helperResize, 270);
 		   }
 		});
 
@@ -317,6 +318,7 @@ function linkaddhost() {
 		$(".save-sort").click(function(){
 			$.log( $("#sortlist").sortable('toArray'));
 		});
+		setTimeout(helperResize, 200);
 	};
 	function refreshPageSpacing(){
 		$("#sortlist .even").removeClass("even");
@@ -386,7 +388,6 @@ function linkaddhost() {
 		label     : ["OFF", "ON"]
 	};
 	$.toggleSwitcher = function(opt){
-		//$.log( $("input[type=switch]") );
 		var options = $.extend({}, defaults, opt);
 		$("input[type=switch]").each(function(i, n){
 			creatElement(n, options);
