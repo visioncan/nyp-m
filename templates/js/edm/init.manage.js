@@ -2,19 +2,29 @@ function init () {
 	if($(document.body).hasClass('uploadbyDOC')){
 		$.uploadTabs();
 		$.upload({ by : "doc" });
-		linkaddhost();
+		
 	}else if($(document.body).hasClass('uploadbyIMG')){
 		$.uploadTabs();
+		$.upload({ by : "img" });
 	}else if ($(document.body).hasClass('manage')){
 		$.edmList();
-		linkaddhost();
+	}else if ($(document.body).hasClass('sort-img')){
+		$.uploadTabs();
+		$.sortDm();
 	}
-	
+	linkaddhost();
 
 
 
 	// 未登入就轉跳
 	//$.log( parent.location = "http://yahoo.com");
+
+	//ajax 全域設定
+	$.ajaxSetup({
+		url  : '/ajax.php',
+		type : "POST" ,
+		dataType : "json"
+	});
 };
 
 
@@ -54,9 +64,6 @@ function linkaddhost() {
 					'val'  : val
 				};
 				$.ajax({
-					"type"     : "POST",
-					"dataType" : "json",
-					"url"      : "ajax.php",
 					"data"     : $.param(param_data),
 					"success"  : function(data){
 						if(data.stat == 'success'){
@@ -112,7 +119,10 @@ function linkaddhost() {
 			'wmode'     : 'transparent',
 			'hideButton': true,
 			'auto'      : true,
-			'queueID'   : 'upload-process'
+			'queueID'   : 'upload-process',
+			'onError'   : function (event,ID,fileObj,errorObj) {
+				alert(errorObj.type + ' Error: ' + errorObj.info);
+			}
 		},
 		SelectRow   = $("#select-row"),
 		Form        = $("#upload-form");
@@ -127,15 +137,16 @@ function linkaddhost() {
 		}
 	};
 
+	/* upload by doc  */
 	function uploadByDoc () {
 		var option = $.extend({}, uploadifyDefaults, {
 			'width'     : 180,
-		    'height'    : 45,
-		    'fileExt'   : '*.pdf;*.doc;*.ppt',
-		    'fileDesc'  : '文件 (.PDF, .DOC, .PPT)',
-		    'multi'     : false,
-		    'sizeLimit' : 102400000, // 100mb
-		    'onSelect'  : function(event, ID, fileObj) {
+		   'height'    : 45,
+		   'fileExt'   : '*.pdf;*.doc;*.ppt',
+		   'fileDesc'  : '文件 (.PDF, .DOC, .PPT)',
+		   'multi'     : false,
+		   'sizeLimit' : 102400000, // 100mb
+		   'onSelect'  : function(event, ID, fileObj) {
 		    	$("#uploader-box").addClass("uploading");
 		    	$("#upload-detail-box").show();
 		    	Form.find(".submit-btn").attr("disabled","disabled").addClass("disabled");
@@ -147,24 +158,22 @@ function linkaddhost() {
 				Form.find(".submit-btn").removeAttr("disabled").removeClass("disabled").val("儲存");
 				var successBox = $("<div/>",{ 'class' : 'success', 'html' : '上傳成功'});
 		    	var outer      = $("<div/>",{ 'class' : 'uploadifyQueueItem'});
+		    	var size       = Math.round(fileObj.size / 1024 );
+		    	if (size > 1000) {
+		    		size = Math.round(size *.001 * 100) * .01;
+		    		size = size.toString() + 'MB';
+		    	}else{
+		    		size = size.toString() + 'KB';
+		    	}
 
 		    	$("<div/>",{
 		    		'class' : "fileName",
-		    		'html'  : fileObj.name
-		    	}).appendTo(outer);
-
-		    	$("<div/>",{
-		    		'class' : "fileSize",
-		    		'html'  : Math.round(fileObj.size / 1024 ) + "KB"
+		    		'html'  : fileObj.name + '<span class="fileSize">'+ size +'</span>'
 		    	}).appendTo(outer);
 		    	
 		    	setTimeout(function(){
-		    		$("#upload-process").addClass("done").append(outer).append(successBox);
-
+		    		$("#upload-process").addClass("done").css('backgroundColor','#EAFDDB').append(outer).append(successBox);
 		    	}, 260);
-			},
-			'onError'   : function (event,ID,fileObj,errorObj) {
-				alert(errorObj.type + ' Error: ' + errorObj.info);
 			}
 		});
 
@@ -173,8 +182,48 @@ function linkaddhost() {
 		formInit();
 	}
 
+	/* upload by img  */
 	function uploadByImg () {
-		
+		var option = $.extend({}, uploadifyDefaults, {
+			'width'     : 180,
+		   'height'    : 45,
+		   'fileExt'   : '*.jpg;*.png;',
+		   'fileDesc'  : '圖片 (.JPG, .PNG)',
+		   'multi'     : true,
+		   'sizeLimit' : 20480000, // 20mb
+		   'onSelectOnce' : function(event, data) {
+		    	$("#uploader-box").addClass("uploading");
+		    	$("#upload-detail-box").show();
+		    	$("#upload-process").css('height',174);
+		    	Form.find(".submit-btn").attr("disabled","disabled").addClass("disabled");
+		    	setTimeout(helperResize, 200);
+		   },
+		   'onAllComplete' : function(event, data) {
+		   	Form.find(".submit-btn").removeAttr("disabled").removeClass("disabled").val("儲存並排序");
+		   	Form.children("form").attr("action", "/dm_sort.php");
+		   	var successBox = $("<div/>",{ 'class' : 'success', 'html' : '上傳成功', 'css' : {'top':'10px'} });
+		    	var outer      = $("<div/>",{ 'class' : 'uploadifyQueueItem'});
+		    	var size       = Math.round(data.allBytesLoaded / 1024 );
+		    	if (size > 1000) {
+		    		size = Math.round(size *.001 * 100) * .01;
+		    		size = size.toString() + 'MB';
+		    	}else{
+		    		size = size.toString() + 'KB';
+		    	}
+		    	$("<div/>",{
+		    		'class' : "fileName",
+		    		'html'  : '已完成上傳' + data.filesUploaded +'個 ('+ size +') 檔案。'
+		    	}).appendTo(outer);
+
+		    	setTimeout(function(){
+		    		$("#upload-process").addClass("done").css({'height':38, 'backgroundColor':'#EAFDDB'}).append(outer).append(successBox);
+		    	}, 260);
+		   }
+		});
+
+		$('#upload-frame').css("minHeight", $("#upload-detail-box").height());
+		$('#dm_upload').uploadify(option);
+		formInit();
 	}
 
 	//////
@@ -194,7 +243,22 @@ function linkaddhost() {
 			preFill        : defaultWords
 		});
 		COL_category();
+		verifyForm();
 	}
+	function verifyForm(){
+		Form.children("form").submit(function() {
+			if($("#title").val() == "") {
+				alert("標題未填寫");
+				return false;
+			}else if($("#descr").val() == "") {
+				alert("描述未填寫");
+				return false;
+			}else{
+				return true;
+			}
+		});
+	}
+
 	// + - 表單
 	function COL_category(){
 		SelectRow.delegate("button", "click", selectRowClick);
@@ -211,10 +275,7 @@ function linkaddhost() {
 				var addCont = orgElem.clone();
 				addCont.children("button").attr("class", "minus btn");
 				addCont.children(".num").text(lng + 1);
-				
 				SelectRow.children(".altext").before(addCont);
-				//orgElem.after(addCont);
-				//$(this).parents(".input").append(  addCont );
 				if( lng >= 4 )
 					$(this).hide();
 		}else{
@@ -222,7 +283,7 @@ function linkaddhost() {
 					SelectRow.children(".select-row").eq(0).children("button").show();
 				
 				//改編號
-				var minusid = $(this).next().text() - 1;
+				var minususid = $(this).next().text() - 1;
 				for( var i = (minusid + 1); i<=4; i++){
 					if( SelectRow.children(".select-row").eq(i).length > 0 ){
 						SelectRow.children(".select-row").eq(i).children(".num").text(i);
@@ -232,9 +293,67 @@ function linkaddhost() {
 		}
 		helperResize();
 	}
+})(jQuery);
 
 
 
+/**********************************************
+  sort 
+**********************************************/
+(function($){
+	$.sortDm = function(){
+		$("#sortlist").sortable({ 
+			'cursor'  : 'move' ,
+			'opacity' : 1,
+			'update'  : function(event, ui){
+				refreshPageSpacing();
+				addPagenum();
+			}
+		});
+		$("#sortlist").disableSelection();
+		delPageEvent();
+		addPagenum();
+
+		$(".save-sort").click(function(){
+			$.log( $("#sortlist").sortable('toArray'));
+		});
+	};
+	function refreshPageSpacing(){
+		$("#sortlist .even").removeClass("even");
+		$("#sortlist li:even").addClass("even");
+	}
+
+	function addPagenum(){
+		$("#sortlist li").each(function(i, target){
+			target.getElementsByTagName("span")[0].innerHTML = i + 1;
+		});
+	}
+
+	function delPageEvent(){
+		$(".del").tipsy({gravity: 's'}).click(function(){
+			if (confirm("請問是否要刪除該張圖片?")) {
+				var target = $(this).parents("li");
+				var pageid = target.attr("id");
+				var param_data = {
+					'fn'    : 'deldmimg',
+					'dmid'  : $(document.body).attr("dm_id"),
+					'pageid': pageid
+				};
+				target.children("a").remove();
+				$.ajax({
+					"data"     : $.param(param_data),
+					"success"  : function(data){
+						if(data.stat == 'success'){
+							target.remove();
+							refreshPageSpacing();
+							addPagenum();
+						}
+						target = pageid = param_data = null;
+					}
+           		});
+			}
+		});
+	}
 })(jQuery);
 
 
