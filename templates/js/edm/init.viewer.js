@@ -1,15 +1,17 @@
 function init () {
-	var viewerid = "edm-viewer";
-	if( $.isMobile !== "mobile"){
-		$.swfView({
-			id     : viewerid,
-			width  : 750,
-			height : 480
-		});
-
-	}else{
-		$("#" + viewerid).html("尚未支援播放");
-	}
+	$.ajax({
+		url   : "/templates/1330490131/js/edm/embed.min.js",
+		type  : "GET",
+		cache : true,
+		dataType : "script",
+		success  : function() {
+			embedInit({
+				vars   : flavars,
+				width  : 750,
+				height : 480
+			});
+		}
+	});
 }
 
 function load() {
@@ -31,64 +33,6 @@ function linkaddhost() {
 		});
 	}
 }
-
-
-(function($){
-	var swfUrl       = "/templates/swf/edmplayer.swf" ,
-		swfobjectUrl = "/templates/js/libs/swfobject.js",
-		installUrl   = "/templates/swf/expressInstall.swf",
-		options,
-		defaults = {
-			width  : 700,
-			height : 480,
-			params : { 
-				wmode  : "opaque",
-				menu   : "false",
-				scale  : "noScale",
-				allowFullscreen : "true",
-				allowScriptAccess : "always",
-				bgcolor : "#EFEFEF"
-			}
-		};
-	$.swfView = function(opt){
-		options = $.extend({}, defaults, opt);
-		addjs();
-	};
-	function addjs () {
-		$("#" + options.id).parent().css("height", options.height);
-		$.ajax({
-			url  : swfobjectUrl,
-			type : "GET",
-			cache : true,
-			dataType : "script",
-			success : function() {
-				var swfv = swfobject.getFlashPlayerVersion();
-				if( swfv.major == 0){
-					alert("沒有flash");
-				}
-				if( !swfobject.hasFlashPlayerVersion("10.0.0") ){
-					alert("升級flash http://get.adobe.com/flashplayer/");
-				}
-				Embed(flavars);
-			}
-		});
-	}
-
-	function Embed(vars){
-		swfobject.embedSWF(
-					swfUrl,
-					options.id,
-					options.width,
-					options.height,
-					"10.0.0", 
-					installUrl, 
-					vars,
-					options.params
-		);
-	}
-})(jQuery);
-
-
 
 
 

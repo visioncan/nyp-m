@@ -2,7 +2,6 @@ function init () {
 	if($(document.body).hasClass('uploadbyDOC')){
 		$.uploadTabs();
 		$.upload({ by : "doc" });
-		
 	}else if($(document.body).hasClass('uploadbyIMG')){
 		$.uploadTabs();
 		$.upload({ by : "img" });
@@ -11,7 +10,10 @@ function init () {
 	}else if ($(document.body).hasClass('sort-img')){
 		$.uploadTabs();
 		$.sortDm();
+	}else if ($(document.body).hasClass('edit-edm')){
+		$.editDM();
 	}
+
 	linkaddhost();
 
 
@@ -125,7 +127,9 @@ function linkaddhost() {
 			}
 		},
 		SelectRow   = $("#select-row"),
-		Form        = $("#upload-form");
+		Form        = $("#upload-form"),
+		codeBox     = $("#embed-code-box"),
+		codeTextArea;
 	$.upload = function(opt){
 		switch(opt.by){
 			case "doc" :
@@ -231,9 +235,19 @@ function linkaddhost() {
 	// form setting
 	//////
 	function formInit() {
-		$.toggleSwitcher({
+		$("input[name='ispublic']").toggleSwitcher({
 			label : ["不公開","公開"]
 		});
+		$("input[name='isembed']").toggleSwitcher({
+			label    : ["不公開","公開"],
+			callback : function(val, switchObj){
+				openEmbedCode(val);
+			}
+		});
+		if ($("input[name='isembed']").val() === "1") {
+			openEmbedCode(1);
+		};
+
 		if( typeof(selectedKeywords) !== "undefined" )
 			defaultWords = selectedKeywords;
 	
@@ -246,6 +260,8 @@ function linkaddhost() {
 		COL_category();
 		verifyForm();
 	}
+
+	//驗證表單
 	function verifyForm(){
 		Form.children("form").submit(function() {
 			if($("#title").val() == "") {
@@ -268,7 +284,6 @@ function linkaddhost() {
 		});	
 	}
 	function selectRowClick(){
-		//var Class = $(this).attr('class');
 		var lng   = SelectRow.children(".select-row").length;
 
 		if( $(this).hasClass("plus") && lng < 5){
@@ -294,7 +309,43 @@ function linkaddhost() {
 		}
 		helperResize();
 	}
+	//embed code
+	function openEmbedCode(value){
+		if (value == 1) {
+			codeTextArea = codeText();
+			codeTextArea.appendTo("#embed-code-box");
+			codeBox.css("height", 120);
+		}else{
+			codeTextArea.remove();
+			codeBox.css("height", 0);
+		}
+	}
+	//
+	function codeText(){
+		var rtEle;
+		if (typeof codeTextArea != undefined || $("#embed-code").length == 0) {
+			rtEle = $("<textarea/>", {
+				'id'   : "embed-code",
+				'text' : "1111"
+			});
+		}
+		return rtEle;
+	}
+
+	$.extend($.upload, {
+		formInit : function(){
+			formInit();
+		}
+	});
 })(jQuery);
+
+
+
+
+
+
+
+
 
 
 
@@ -357,6 +408,29 @@ function linkaddhost() {
 		});
 	}
 })(jQuery);
+
+
+
+
+
+
+
+/**********************************************
+  edit dm 
+**********************************************/
+(function($){
+	$.editDM = function(){
+		$.upload.formInit();
+	};
+})(jQuery);
+
+
+
+
+
+
+
+
 
 
 
