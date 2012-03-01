@@ -45,7 +45,7 @@ function helperResize() {
 function linkaddhost() {
 	//link 加 host
 	if(typeof parentHost != "undefined"){
-		$(".upload_link").each(function(){
+		$(".upload_link, #edm-list a").each(function(){
 			$(this).attr("href", $(this).attr("href") + "?host=" + parentHost);
 		});
 	}
@@ -94,6 +94,9 @@ function linkaddhost() {
 **********************************************/
 (function($){
 	$.uploadTabs = function(){
+		if(typeof parentHost == "undefined"){
+			return;
+		}
 		$("#tabs li").eq(0).click(function() {
 			if (!$(this).hasClass("current")) {
 				window.location = "dm_upload.php?type=img&host=" + parentHost;
@@ -194,7 +197,7 @@ function linkaddhost() {
 		   'fileExt'   : '*.jpg;*.png;',
 		   'fileDesc'  : '圖片 (.JPG, .PNG)',
 		   'multi'     : true,
-		   'sizeLimit' : 20480000, // 20mb
+		   'sizeLimit' : 5120000, // 5mb
 		   'onSelectOnce' : function(event, data) {
 		    	$("#uploader-box").addClass("uploading");
 		    	$("#upload-detail-box").show();
@@ -205,7 +208,7 @@ function linkaddhost() {
 		   'onAllComplete' : function(event, data) {
 		   	Form.find(".submit-btn").removeAttr("disabled").removeClass("disabled").val("儲存並排序");
 		   	Form.children("form").attr("action", "/dm_sort.php?host=" + parentHost);
-		   	var successBox = $("<div/>",{ 'class' : 'success', 'html' : '上傳成功', 'css' : {'top':'10px'} });
+		   	var successBox = $("<div/>",{ 'class' : 'success', 'html' : '上傳成功', 'css' : {'top':'20px'} });
 		    	var outer      = $("<div/>",{ 'class' : 'uploadifyQueueItem'});
 		    	var size       = Math.round(data.allBytesLoaded / 1024 );
 		    	if (size > 1000) {
@@ -254,7 +257,7 @@ function linkaddhost() {
 		$("#keywords").autoSuggest("", {
 			asHtmlID       : "keywords",
 			startText      : "請輸入關鍵字" , 
-			showResultList : false ,  //不顯示下拉
+			showResultList : false , 
 			preFill        : defaultWords
 		});
 		COL_category();
@@ -314,7 +317,12 @@ function linkaddhost() {
 		if (value == 1) {
 			codeTextArea = codeText();
 			codeTextArea.appendTo("#embed-code-box");
-			codeBox.css("height", 120);
+			codeTextArea.focus(function(){
+				this.select();
+			}).mouseup(function(){
+        		return false;
+			});
+			codeBox.css("height", 80);
 		}else{
 			codeTextArea.remove();
 			codeBox.css("height", 0);
@@ -326,7 +334,8 @@ function linkaddhost() {
 		if (typeof codeTextArea != undefined || $("#embed-code").length == 0) {
 			rtEle = $("<textarea/>", {
 				'id'   : "embed-code",
-				'text' : "1111"
+				'text' : embedCode.generate(),
+				'css' : { 'fontFamily': 'monospace', 'height' : 55, 'color' : '#666', 'padding' : '8px' }
 			});
 		}
 		return rtEle;
@@ -343,6 +352,27 @@ function linkaddhost() {
 
 
 
+/**********************************************
+  embed player 
+**********************************************/
+var embedCode = {
+	'host' : "http://172.17.10.158:92/",
+	'size' : {
+		w : 560,
+		h : 340
+	},
+	'generate' : function() {
+		var codeWrap =  $("<div/>");
+		$("<iframe/>",{
+			'Width' : embedCode.size.w,
+			'Height' : embedCode.size.h,
+			'frameborder' : 0,
+			'allowfullscreen' : true,
+			'src' : embedCode.host + "embed/" + $(document.body).attr("dm_id")
+		}).appendTo(codeWrap);
+		return codeWrap.html();
+	}
+};
 
 
 
@@ -421,6 +451,8 @@ function linkaddhost() {
 (function($){
 	$.editDM = function(){
 		$.upload.formInit();
+		helperResize();
+		$("#edm-view").css('height', embedCode.size.h).html(embedCode.generate());
 	};
 })(jQuery);
 
