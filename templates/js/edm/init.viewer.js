@@ -7,8 +7,7 @@ function init () {
 		success  : function() {
 			embedInit({
 				vars   : flavars,
-				width  : 750,
-				height : 480
+				width  : 600
 			});
 		}
 	});
