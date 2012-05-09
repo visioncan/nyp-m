@@ -14,8 +14,9 @@ function init () {
 		$.editDM();
 	}
 
-	linkaddhost();
+	
 
+	linkaddhost();
 
 
 	// 未登入就轉跳
@@ -36,7 +37,6 @@ function load() {
 }
 
 function helperResize() {
-	parentHost = getHostVars();
 	if(parentHost == ''){
 		return;
 	}
@@ -45,10 +45,11 @@ function helperResize() {
 }
 
 function linkaddhost() {
+	parentHost = getHostVars();
 	//link 加 host
-	var urlparam = $.uploadTabs.getParams();
 	$(".upload_link, #edm-list a, .addnew").each(function(){
-		$(this).attr("href", $(this).attr("href") + "?" + $.param(urlparam));
+		var hostvar = ($(this).attr("href").indexOf("?") == -1) ? "?host=" : "&host=";
+		$(this).attr("href", $(this).attr("href") + hostvar + parentHost);
 	});
 }
 
