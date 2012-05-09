@@ -30,12 +30,14 @@ function init () {
 };
 
 
+var parentHost;
 function load() {
 	helperResize();
 }
 
 function helperResize() {
-	if(typeof parentHost == "undefined"){
+	parentHost = getHostVars();
+	if(parentHost == ''){
 		return;
 	}
 	var height = $(document.body).outerHeight();
@@ -44,12 +46,26 @@ function helperResize() {
 
 function linkaddhost() {
 	//link 加 host
-	if(typeof parentHost != "undefined"){
-		$(".upload_link, #edm-list a").each(function(){
-			$(this).attr("href", $(this).attr("href") + "?host=" + parentHost);
-		});
-	}
+	var urlparam = $.uploadTabs.getParams();
+	$(".upload_link, #edm-list a, .addnew").each(function(){
+		$(this).attr("href", $(this).attr("href") + "?" + $.param(urlparam));
+	});
 }
+
+function getHostVars() {
+	if(window.location.href.indexOf("?") == -1 || window.location.href.indexOf('host=') == -1){
+		return '';
+	}
+	var vars = [],
+		hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	for(var i = 0; i < hashes.length; i++){
+		var hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+	}
+	return vars.host;
+}
+
 /**********************************************
   manage list 
 **********************************************/
@@ -94,20 +110,41 @@ function linkaddhost() {
 **********************************************/
 (function($){
 	$.uploadTabs = function(){
-		if(typeof parentHost == "undefined"){
-			return;
-		}
 		$("#tabs li").eq(0).click(function() {
 			if (!$(this).hasClass("current")) {
-				window.location = "dm_upload.php?type=img&host=" + parentHost;
+				var urlparam = getParams();
+				urlparam['type'] = 'img';
+				window.location = "dm_upload.php?" + $.param(urlparam);
 			}
 		});
 		$("#tabs li").eq(1).click(function() {
 			if (!$(this).hasClass("current")) {
-				window.location = "dm_upload.php?host=" + parentHost;
+				var urlparam = getParams();
+				delete urlparam['type'];
+				window.location = "dm_upload.php?" + $.param(urlparam);
 			}
 		});
 	};
+	function getParams(){
+		var url = window.location.href;
+		if (url.indexOf("?") == -1) {
+			return {};
+		}else{
+			var paraString = url.substring(url.indexOf("?")+1,url.length).split("&"); 
+			var paramObj = {};
+			for (i=0; j = paraString[i]; i++){ 
+				paramObj[j.substring(0, j.indexOf("="))] = j.substring(j.indexOf("=")+1, j.length); 
+			}
+			return paramObj;
+		}
+	}
+
+	$.extend($.uploadTabs, {
+		getParams : function(){
+			return getParams();
+		}
+	});
+
 })(jQuery);
 
 
@@ -115,7 +152,7 @@ function linkaddhost() {
   upload 
 **********************************************/
 (function($){
-	var isUploading = false,
+	var isSelected = false,
 		uploadifyDefaults = {
 			'script'    : '/uploadify.php',
 			'folder'    : '/upload',
@@ -154,6 +191,7 @@ function linkaddhost() {
 		   'multi'     : false,
 		   'sizeLimit' : 102400000, // 100mb
 		   'onSelect'  : function(event, ID, fileObj) {
+		   		isSelected = true;
 		    	$("#uploader-box").addClass("uploading");
 		    	$("#upload-detail-box").show();
 		    	Form.find(".submit-btn").attr("disabled","disabled").addClass("disabled");
@@ -199,6 +237,7 @@ function linkaddhost() {
 		   'multi'     : true,
 		   'sizeLimit' : 5120000, // 5mb
 		   'onSelectOnce' : function(event, data) {
+		   		isSelected = true;
 		    	$("#uploader-box").addClass("uploading");
 		    	$("#upload-detail-box").show();
 		    	$("#upload-process").css('height',174);
@@ -274,6 +313,7 @@ function linkaddhost() {
 				alert("描述未填寫");
 				return false;
 			}else{
+				isSelected = false;
 				return true;
 			}
 		});
@@ -302,8 +342,10 @@ function linkaddhost() {
 					SelectRow.children(".select-row").eq(0).children("button").show();
 				
 				//改編號
+				
 				var minususid = $(this).next().text() - 1;
-				for( var i = (minusid + 1); i<=4; i++){
+				
+				for( var i = (minususid + 1); i<=4; i++){
 					if( SelectRow.children(".select-row").eq(i).length > 0 ){
 						SelectRow.children(".select-row").eq(i).children(".num").text(i);
 					}
@@ -344,6 +386,9 @@ function linkaddhost() {
 	$.extend($.upload, {
 		formInit : function(){
 			formInit();
+		},
+		isSelected : function(){
+			return isSelected;
 		}
 	});
 })(jQuery);
@@ -561,6 +606,17 @@ var embedCode = {
 
 $(document).ready(init);
 window.onload = load;
+window.onbeforeunload = function(evt) {
+	if(!$.upload.isSelected()) return;
+    var message = '您所上傳的EDM資料尚未儲存! 確定放棄儲存嗎?';
+    if (typeof evt == 'undefined') {
+        evt = window.event;
+    }       
+    if (evt) {
+        evt.returnValue = message;
+    }
+    return message;
+};
 
 $.enableConsole = true;
 $.fn.log = $.log = $.fn.console = $.console = function(str, method){
