@@ -46,6 +46,7 @@ function helperResize() {
 
 function linkaddhost() {
 	parentHost = getHostVars();
+
 	//link 加 host
 	$(".upload_link, #edm-list a, .addnew").each(function(){
 		var hostvar = ($(this).attr("href").indexOf("?") == -1) ? "?host=" : "&host=";
@@ -62,8 +63,9 @@ function getHostVars() {
 	for(var i = 0; i < hashes.length; i++){
 		var hash = hashes[i].split('=');
         vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
+        vars[hash[0]] = decodeURIComponent(hash[1]);
 	}
+
 	return vars.host;
 }
 
@@ -86,7 +88,6 @@ function getHostVars() {
 					"data"     : $.param(param_data),
 					"success"  : function(data){
 						if(data.stat == 'success'){
-							//$.log( parentEl );
 							parentEl.attr('class', PUBLICLY_CLASS[val]);
 						}
 					}
@@ -134,7 +135,7 @@ function getHostVars() {
 			var paraString = url.substring(url.indexOf("?")+1,url.length).split("&"); 
 			var paramObj = {};
 			for (i=0; j = paraString[i]; i++){ 
-				paramObj[j.substring(0, j.indexOf("="))] = j.substring(j.indexOf("=")+1, j.length); 
+				paramObj[j.substring(0, j.indexOf("="))] = decodeURIComponent(j.substring(j.indexOf("=")+1, j.length));
 			}
 			return paramObj;
 		}
