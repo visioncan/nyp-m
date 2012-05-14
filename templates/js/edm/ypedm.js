@@ -1,6 +1,3 @@
-var edmDefaults = {
-	host : "http://172.17.10.158:92/frame/"
-};
 var ypedmfn = {
 	outer : null,
 	frame : null,
@@ -31,11 +28,10 @@ var ypedmfn = {
 			this.frame.style.width = frameWidth + "px";
 		}
 		frameParam.push("host=" + window.location.host);
-		frameParam.push("width=" + frameWidth);
 		if(ypedm.page != undefined){
 			frameParam.push("page=" + ypedm.page);
 		}
-		this.frame.src = edmDefaults.host + ypedm.id + "/?" + frameParam.join("&");
+		this.frame.src = 'http://' + ypedm.src + "?" + frameParam.join("&");
 		this.outer.style.width = frameWidth + "px";
 		this.outer.appendChild(this.frame);
 	}
