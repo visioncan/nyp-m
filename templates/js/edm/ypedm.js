@@ -44,13 +44,46 @@ function resizeIframe (height) {
 }
 
 
-Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
+function mobileFull(p){
+	var fullViewWrap = document.getElementById('mobile-full-view'),
+		dmFrame = document.getElementById('edm-frame'),
+		page = 1;
+	page = (typeof p === 'undefined' || p === '') ? 1 : p;
+
+	if ( fullViewWrap == null ) {
+		fullViewWrap = document.createElement('div');
+		fullViewWrap.id = 'mobile-full-view';
+		fullViewWrap.style.position = 'fixed';
+		fullViewWrap.style.width = '100%';
+		fullViewWrap.style.height = '100%';
+		fullViewWrap.style.top = '0';
+		fullViewWrap.style.left = '0';
+		fullViewWrap.style.zIndex = '9999999';
+		document.body.appendChild(fullViewWrap);
+	}
+	var frameSrc = dmFrame.getAttribute('src');
+	if(frameSrc.indexOf("?") != -1){
+		fullViewWrap.style.display = 'block';
+		fullViewWrap.appendChild(dmFrame);
+
+		dmFrame.style.width = '100%';
+		dmFrame.style.height = '100%';
+
+		dmFrame.setAttribute('src',frameSrc + '&mobile&p=' + page);
+		document.getElementById('wrap').style.display = 'none';
+	}
+}
+
+
+
+
+// Object.size = function(obj) {
+//     var size = 0, key;
+//     for (key in obj) {
+//         if (obj.hasOwnProperty(key)) size++;
+//     }
+//     return size;
+// };
 
 
 ypedmfn.init();

@@ -41,7 +41,7 @@
 		var swfv = swfobject.getFlashPlayerVersion();
 		if( swfv.major == 0){
 			alert("您沒有安裝flash");
-			return
+			return;
 		}
 		if( !swfobject.hasFlashPlayerVersion("10.0.0") ){
 			if(confirm("您的flash player版本過舊，請升級flash player")){
@@ -68,12 +68,56 @@
 
 
 
+
+
+
+
+(function($){
+	var options,
+		playerUrl = "/templates/1339635630/js/edm/m.embed.min.js",
+		defaults = {
+			width  : 580,
+			height : 400
+		};
+	$.mobileView = function(opt){
+		options = $.extend({}, defaults, opt);
+		addjs();
+	};
+	function addjs () {
+		$("#" + options.id).parent().addClass('mobile').css({
+			"height" : options.height
+		});
+		if(typeof $.player === "undefined"){
+			$.ajax({
+				url  : playerUrl,
+				type : "GET",
+				cache : false,
+				dataType : "script",
+				success : function() {
+					initPlayer();
+				}
+			});
+		}else{
+			initPlayer();
+		}
+	}
+
+	function initPlayer(){
+		$.player(options);
+	}
+})(jQuery);
+
+
+
+
+
+
 function embedInit(defaults){
 	var viewerid = "edm-viewer";
 	if( $.isMobile !== "mobile"){
 		$.swfView( $.extend({}, defaults, { 'id' : viewerid }) );
 	}else{
-		$("#" + viewerid).html("尚未支援播放");
+		$.mobileView( $.extend({}, defaults, { 'id' : viewerid }) );
 	}
 }
 

@@ -7,7 +7,7 @@ function init () {
 		success  : function() {
 			embedInit({
 				vars   : flavars,
-				width  : (document.body.clientWidth - 180)
+				width  : (document.body.clientWidth - 160)
 			});
 		}
 	});
@@ -55,17 +55,19 @@ function getHostVars() {
 $(document).ready(init);
 window.onload = load;
 
-Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
+
+
+// Object.size = function(obj) {
+//     var size = 0, key;
+//     for (key in obj) {
+//         if (obj.hasOwnProperty(key)) size++;
+//     }
+//     return size;
+// };
 
 
 $.enableConsole = true;
-$.fn.log = $.log = $.fn.console = $.console = function(str, method){
+var log = $.log =  $.fn.console = $.console = function(str, method){
 method = (( method == undefined) ? "log" :  method );
 if (window.console && console[method] && $.enableConsole)
 	//console[method].apply(this, [].splice.call(arguments,1))
