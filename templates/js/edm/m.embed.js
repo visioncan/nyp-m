@@ -1,7 +1,7 @@
 
 $.edmService = {
 	data: {},
-	url : "http:/172.17.10.158/_Amfphp/?contentType=application/json",
+	url : "http://127.0.0.1/_Amfphp/?contentType=application/json",
 	callObj : {
 		"serviceName": "edm/edmService",
 		"methodName": "getDMData"
@@ -96,7 +96,7 @@ dP                    d8888P
 		ld.id = 'loader-overlay';
 		ld.appendChild(ldsp);
 		$(options.id).before(ld);
-		$.edmService.get('1', intoview, { color: '#666'});
+		$.edmService.get(options.vars.dm, intoview, { color: '#666'});
 		fixListWidth();
 	}
 
@@ -119,7 +119,7 @@ dP                    d8888P
 		$(overlyLink).click(function(e){
 			var page = e.currentTarget.hash.replace('#','');
 			var dmFrame = document.getElementById('framehelper');
-			dmFrame.setAttribute('src' , dmFrame.getAttribute('src') + '&mode=mobile&p=' + page);
+				dmFrame.setAttribute('src' , dmFrame.getAttribute('src') + '&mode=mobile&p=' + page);
 		});
 		document.querySelector(options.id).appendChild(overlyLink);
 
@@ -997,9 +997,11 @@ var mobiFullView = {
 	init : function(){
 		var htmlClass = document.getElementsByTagName('html')[0].getAttribute('class');
 		if( /mobile/i.test(document.body.className) && /mobile/i.test(htmlClass)  ){
-			$.edmService.get("1", this.ajaxDone);
-			edm.init();
-			this.addhelper();
+			if(typeof flavars !== 'undefined'){
+				$.edmService.get(flavars.dm, this.ajaxDone);
+				edm.init();
+				this.addhelper();
+			}
 		}
 	},
 	ajaxDone : function(){
