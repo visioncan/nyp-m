@@ -1,4 +1,6 @@
 function init () {
+	linkaddhost();
+
 	if($(document.body).hasClass('uploadbyDOC')){
 		$.uploadTabs();
 		$.upload({ by : "doc" });
@@ -13,10 +15,6 @@ function init () {
 	}else if ($(document.body).hasClass('edit-edm')){
 		$.editDM();
 	}
-
-	
-
-	linkaddhost();
 
 
 	// 未登入就轉跳
@@ -37,8 +35,8 @@ function load() {
 }
 
 function helperResize() {
-	if(parentHost == ''){
-		return;
+	if(typeof parentHost === 'undefined'){
+		parentHost = getHostVars();
 	}
 	var height = $(document.body).outerHeight();
 	document.getElementById('framehelper').src = "//" + parentHost + "/framehelper.html?height=" + height + "&" + Math.random();
@@ -367,6 +365,7 @@ function getHostVars() {
         		return false;
 			});
 			codeBox.css("height", 80);
+			setTimeout(helperResize, 300);
 		}else{
 			codeTextArea.remove();
 			codeBox.css("height", 0);
@@ -498,8 +497,8 @@ var embedCode = {
 (function($){
 	$.editDM = function(){
 		$.upload.formInit();
-		helperResize();
 		$("#edm-view").css('height', embedCode.size.h).html(embedCode.generate());
+		//setTimeout(helperResize, 200);
 	};
 })(jQuery);
 
@@ -605,9 +604,10 @@ var embedCode = {
 
 
 
-
+$(window).load(load);
 $(document).ready(init);
-window.onload = load;
+
+
 window.onbeforeunload = function(evt) {
 	if(!$.upload.isSelected()) return;
     var message = '您所上傳的EDM資料尚未儲存! 確定放棄儲存嗎?';

@@ -7,7 +7,7 @@ function init () {
 		success  : function() {
 			embedInit({
 				vars   : flavars,
-				width  : (document.body.clientWidth - 160)
+				width  : (document.body.clientWidth - 180)
 			});
 		}
 	});
@@ -55,15 +55,6 @@ function getHostVars() {
 $(document).ready(init);
 window.onload = load;
 
-
-
-// Object.size = function(obj) {
-//     var size = 0, key;
-//     for (key in obj) {
-//         if (obj.hasOwnProperty(key)) size++;
-//     }
-//     return size;
-// };
 
 
 $.enableConsole = true;
