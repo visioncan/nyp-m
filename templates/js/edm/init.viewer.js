@@ -9,6 +9,7 @@ function init () {
 				vars   : flavars,
 				width  : (document.body.clientWidth - 180)
 			});
+			helperResize();
 		}
 	});
 	linkaddhost();
@@ -51,9 +52,9 @@ function getHostVars() {
 
 
 
-
+$(window).load(load);
 $(document).ready(init);
-window.onload = load;
+
 
 
 

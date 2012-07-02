@@ -5,7 +5,7 @@
 		installUrl   = "/templates/swf/expressInstall.swf",
 		options,
 		defaults = {
-			width  : 580,
+			width  : 700,
 			height : 400,
 			params : { 
 				wmode  : "opaque",
