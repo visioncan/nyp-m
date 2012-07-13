@@ -21,7 +21,6 @@
 		addjs();
 	};
 	function addjs () {
-		$("#" + options.id).parent().css("height", options.height);
 		if(typeof swfobject === "undefined"){
 			$.ajax({
 				url  : swfobjectUrl,
@@ -56,8 +55,8 @@
 		swfobject.embedSWF(
 					swfUrl,
 					options.id,
-					options.width,
-					options.height,
+					'100%',
+					'100%',
 					"10.0.0", 
 					installUrl, 
 					vars,
@@ -74,13 +73,10 @@
 
 (function($){
 	var options,
-		playerUrl = "/templates/1339635630/js/edm/m.embed.min.js",
-		defaults = {
-			width  : 580,
-			height : 400
-		};
+		playerUrl = "/templates/1342154131/js/edm/m.embed.min.js";
 	$.mobileView = function(opt){
-		options = $.extend({}, defaults, opt);
+		options = opt;
+		options.height = document.body.clientHeight;
 		addjs();
 	};
 	function addjs () {
@@ -123,7 +119,7 @@ function embedInit(defaults){
 
 
 (function(){
-	if(typeof defaultEmbed !== "undefined"){
+	if(typeof defaultEmbed !== "undefined" && defaultEmbed.length !== 0){
 		embedInit(defaultEmbed);
 	}
 })();

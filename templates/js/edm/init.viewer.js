@@ -1,17 +1,12 @@
 function init () {
-	$.ajax({
-		url   : "/templates/1330490131/js/edm/embed.min.js",
-		type  : "GET",
-		cache : true,
-		dataType : "script",
-		success  : function() {
-			embedInit({
-				vars   : flavars,
-				width  : (document.body.clientWidth - 180)
-			});
-			helperResize();
-		}
-	});
+	$("<iframe/>",{
+		'Width' : '100%',
+		'Height' : '400',
+		'frameborder' : 0,
+		'allowfullscreen' : true,
+		'src' : '//' + window.location.host + "/embed/" + flavars.dm
+	}).appendTo("#edm-view");
+
 	linkaddhost();
 }
 

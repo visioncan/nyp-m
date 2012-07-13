@@ -100,6 +100,12 @@ function getHostVars() {
 			}
 			return false;
 		});
+		//fail todo
+		$("#edm-list .fail").each(function(i,n){
+			$(this).find(".edit").remove();
+			$(this).find(".switches").remove();
+			$(this).find(".img").removeAttr("href");
+		});
 	};
 })(jQuery);
 
