@@ -172,6 +172,8 @@ function getHostVars() {
 				alert(errorObj.type + ' Error: ' + errorObj.info);
 			}
 		},
+		totalSize   = 0,
+		totalFiles  = 0,
 		SelectRow   = $("#select-row"),
 		Form        = $("#upload-form"),
 		codeBox     = $("#embed-code-box"),
@@ -205,25 +207,23 @@ function getHostVars() {
 		    	setTimeout(helperResize, 200);
 		    },
 			'onComplete': function(event, ID, fileObj, response, data) {
-				
 				Form.find(".submit-btn").removeAttr("disabled").removeClass("disabled").val("儲存");
 				var successBox = $("<div/>",{ 'class' : 'success', 'html' : '上傳成功'});
 		    	var outer      = $("<div/>",{ 'class' : 'uploadifyQueueItem'});
 		    	var size       = Math.round(fileObj.size / 1024 );
+
 		    	if (size > 1000) {
 		    		size = Math.round(size *.001 * 100) * .01;
 		    		size = size.toString() + 'MB';
 		    	}else{
 		    		size = size.toString() + 'KB';
-		    	}
-
+		    	};
 		    	$("<div/>",{
 		    		'class' : "fileName",
 		    		'html'  : fileObj.name + '<span class="fileSize">'+ size +'</span>'
 		    	}).appendTo(outer);
-		    	
 		    	setTimeout(function(){
-		    		$("#upload-process").addClass("done").css('backgroundColor','#EAFDDB').append(outer).append(successBox);
+		    		$("#upload-process").addClass("done").append(outer).append(successBox);
 		    	}, 260);
 			}
 		});
@@ -237,43 +237,72 @@ function getHostVars() {
 	function uploadByImg () {
 		var option = $.extend({}, uploadifyDefaults, {
 			'width'     : 180,
-		   'height'    : 45,
-		   'fileExt'   : '*.jpg;*.png;',
-		   'fileDesc'  : '圖片 (.JPG, .PNG)',
-		   'multi'     : true,
-		   'sizeLimit' : 5120000, // 5mb
-		   'onSelectOnce' : function(event, data) {
-		   		isSelected = true;
-		    	$("#uploader-box").addClass("uploading");
-		    	$("#upload-detail-box").show();
-		    	$("#upload-process").css('height',174);
-		    	Form.find(".submit-btn").attr("disabled","disabled").addClass("disabled");
-		    	setTimeout(helperResize, 200);
-		   },
-		   'onAllComplete' : function(event, data) {
-		   	Form.find(".submit-btn").removeAttr("disabled").removeClass("disabled").val("儲存並排序");
-		   	Form.children("form").attr("action", "/dm_sort.php?host=" + parentHost);
-		   	var successBox = $("<div/>",{ 'class' : 'success', 'html' : '上傳成功', 'css' : {'top':'20px'} });
-		    	var outer      = $("<div/>",{ 'class' : 'uploadifyQueueItem'});
-		    	var size       = Math.round(data.allBytesLoaded / 1024 );
-		    	if (size > 1000) {
-		    		size = Math.round(size *.001 * 100) * .01;
-		    		size = size.toString() + 'MB';
-		    	}else{
-		    		size = size.toString() + 'KB';
-		    	}
-		    	$("<div/>",{
-		    		'class' : "fileName",
-		    		'html'  : '已完成上傳' + data.filesUploaded +'個 ('+ size +') 檔案。'
-		    	}).appendTo(outer);
+			'height'    : 45,
+			'fileExt'   : '*.jpg;*.png;',
+			'fileDesc'  : '圖片 (.JPG, .PNG)',
+			'multi'     : true,
+			'sizeLimit' : 5120000, // 5mb
+			'onSelect' : function(event, data) {
+				isSelected = true;
+			 	$("#uploader-box").addClass("uploading");
+			 	$("#upload-detail-box").show();
+			 	//已有上傳
+			 	if ( $("#upload-process > .success").length > 0) {
+			 		$("#upload-process").removeClass("done");
+			 		$("#upload-process > .success").remove();
+			 		$("#upload-process > .uploadifyQueueItem").remove();
+				}
+			 	Form.find(".submit-btn").attr("disabled","disabled").addClass("disabled");
+			 	setTimeout(helperResize, 200);
+			},
+			'onAllComplete' : function(event, data) {
+				Form.find(".submit-btn").removeAttr("disabled").removeClass("disabled").val("儲存並排序");
+				Form.children("form").attr("action", "/dm_sort.php?host=" + parentHost);
+				var successBox = $("<div/>",{ 'class' : 'success', 'html' : '上傳成功', 'css' : {'top':'20px'} });
+			 	var outer      = $("<div/>",{ 'class' : 'uploadifyQueueItem'});
+			 	var uploadMore = $("<span/>",{ 'class' : 'upload-more', 'html' : '我要上傳更多圖片'});
 
-		    	setTimeout(function(){
-		    		$("#upload-process").addClass("done").css({'height':38, 'backgroundColor':'#EAFDDB'}).append(outer).append(successBox);
-		    	}, 260);
-		    	setTimeout(helperResize, 270);
-		   }
+			 	var uploadedText;
+			 	if (totalFiles === 0) {
+			 		uploadedText = '已上傳';
+			 		totalFiles = data.filesUploaded;
+			 		totalSize  = data.allBytesLoaded;
+			 	}else{
+			 		uploadedText = '總共完成上傳';
+			 		totalFiles += data.filesUploaded;
+			 		totalSize  += data.allBytesLoaded;
+			 	}
+			 	var errorText;
+			 	if (data.errors != 0) {
+			 		errorText = ', ' + data.errors + '個檔案上傳錯誤';
+			 	}
+
+			 	var size = Math.round(totalSize / 1024 );
+			 	if (size > 1000) {
+			 		size = Math.round(size *.001 * 100) * .01;
+			 		size = size.toString() + 'MB';
+			 	}else{
+			 		size = size.toString() + 'KB';
+			 	}
+
+			 	uploadMore.click(function(e){
+			 		if ($("#uploader-box").hasClass("uploading")) {
+			 			$("#uploader-box").removeClass("uploading");
+			 			setTimeout(helperResize, 270);
+			 		}
+			 	});
+
+			 	$("<div/>",{
+			 		'class' : 'fileName',
+			 		'html'  : uploadedText + totalFiles +'個 ('+ size +') 檔案。'
+			 	}).append(uploadMore).appendTo(outer);
+
+			 	setTimeout(function(){
+			 		$("#upload-process").addClass("done").append(outer).append(successBox);
+			 	}, 260);
+			 	setTimeout(helperResize, 270);
+			}
 		});
-
 		$('#upload-frame').css("minHeight", $("#upload-detail-box").height());
 		$('#dm_upload').uploadify(option);
 		formInit();

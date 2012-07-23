@@ -1,7 +1,7 @@
 
 $.edmService = {
 	data: {},
-	url : "http://172.17.10.158/_Amfphp/?contentType=application/json",
+	url : "http://192.168.0.109/_Amfphp/?contentType=application/json",
 	callObj : {
 		"serviceName": "edm/edmService",
 		"methodName": "getDMData"
